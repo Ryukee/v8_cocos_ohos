@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [arm64, arm]
+        arch: [arm64]
     name: "Openharmony"
     runs-on: ubuntu-latest
     steps:

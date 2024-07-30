@@ -11544,3 +11544,49 @@ std::string SourceLocation::ToString() const {
 }  // namespace v8
 
 #include "src/api/api-macros-undef.h"
+
+#include "include/v8-version.h"
+namespace v8
+{
+V8_EXPORT Local<ArrayBuffer> ArrayBuffer_New_Without_Stl(Isolate* isolate, 
+      void* data, size_t byte_length, BackingStore::DeleterCallback deleter,
+      void* deleter_data)
+{
+    auto Backing = ArrayBuffer::NewBackingStore(
+            data, byte_length,deleter,
+            deleter_data);
+    return ArrayBuffer::New(isolate, std::move(Backing));
+}
+
+V8_EXPORT Local<ArrayBuffer> ArrayBuffer_New_Without_Stl(Isolate* isolate, 
+      void* data, size_t byte_length)
+{
+#if V8_MAJOR_VERSION < 9
+  CHECK_IMPLIES(byte_length != 0, data != nullptr);
+  CHECK_LE(byte_length, i::JSArrayBuffer::kMaxByteLength);
+  i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(isolate);
+
+  std::shared_ptr<i::BackingStore> backing_store = LookupOrCreateBackingStore(
+      i_isolate, data, byte_length, i::SharedFlag::kNotShared, ArrayBufferCreationMode::kExternalized);
+
+  i::Handle<i::JSArrayBuffer> obj =
+      i_isolate->factory()->NewJSArrayBuffer(std::move(backing_store));
+  obj->set_is_external(true);
+  return Utils::ToLocal(obj);
+#else
+  auto Backing = ArrayBuffer::NewBackingStore(
+          data, byte_length, BackingStore::EmptyDeleter, nullptr);
+  return ArrayBuffer::New(isolate, std::move(Backing));
+#endif
+}
+
+V8_EXPORT void* ArrayBuffer_Get_Data(Local<ArrayBuffer> array_buffer, size_t &byte_length)
+{
+    byte_length = array_buffer->GetBackingStore()->ByteLength();
+    return array_buffer->GetBackingStore()->Data();
+}
+V8_EXPORT void* ArrayBuffer_Get_Data(Local<ArrayBuffer> array_buffer)
+{
+    return array_buffer->GetBackingStore()->Data();
+}
+}
