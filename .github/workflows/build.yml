@@ -195,6 +195,7 @@ jobs:
         run: |
           export PATH=${{ env.DEPOT_TOOLS_PATH }}:$PATH
           which gn
+          chmod 777 ./build-oh.sh 
           ./build-oh.sh ${{ matrix.arch }}
 
       - name: Copy to dist folder
