@@ -204,9 +204,8 @@ jobs:
           echo "---------------------"
           ls -l ./out/oh/obj
           mkdir dist
-          cp ./out/oh/d8 ./dist/
           cp ./out/oh/obj/libv8_monolith.a ./dist/
-          cp -r ./include ./dist/
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
